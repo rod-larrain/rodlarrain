@@ -231,9 +231,12 @@ let lang='en';
 
 /* decode effect */
 const GLYPHS='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#/[]+';
+function setTxt(el,v){cancelAnimationFrame(el._r);clearTimeout(el._s);el._t=v;el.textContent=v}
 function scramble(el,text,dur=650){
+  el._t=text;cancelAnimationFrame(el._r);clearTimeout(el._s);
   if(reduce){el.textContent=text;return}
-  const len=text.length,start=performance.now();cancelAnimationFrame(el._r);
+  const len=text.length,start=performance.now();
+  el._s=setTimeout(()=>{cancelAnimationFrame(el._r);el.textContent=el._t},dur+120);
   (function f(now){const p=Math.min(1,(now-start)/dur);let o='';
     for(let i=0;i<len;i++){const ch=text[i];if(ch===' '){o+=' ';continue}
       o+= i<p*len ? ch : GLYPHS[(Math.random()*GLYPHS.length)|0]}
@@ -320,8 +323,8 @@ document.addEventListener('keydown',e=>{if(open==='work'){if(e.key==='ArrowRight
 function applyLang(animate){
   const t=T[lang];
   document.querySelectorAll('[data-k]').forEach(el=>{const v=t[el.dataset.k];if(v===undefined)return;
-    if(el.classList.contains('mono')&&animate)scramble(el,v.toUpperCase(),600);else el.textContent=v});
-  const lb=$('lang');animate?scramble(lb,t.lang.toUpperCase(),400):lb.textContent=t.lang;
+    if(el.classList.contains('mono')&&animate)scramble(el,v.toUpperCase(),600);else setTxt(el,v)});
+  const lb=$('lang');animate?scramble(lb,t.lang.toUpperCase(),400):setTxt(lb,t.lang);
   lb.setAttribute('aria-label',lang==='en'?'Cambiar a español':'Switch to English');
   document.documentElement.lang=lang;
   if(cap.firstChild)renderCap();
@@ -330,7 +333,7 @@ $('lang').onclick=()=>{lang=lang==='en'?'es':'en';applyLang(true)};
 applyLang(false);
 
 /* hover decode on mono links */
-document.querySelectorAll('.label,.corner a,.c-tc button').forEach(el=>el.addEventListener('mouseenter',()=>{if(el._busy)return;el._busy=1;scramble(el,el.textContent.toUpperCase(),420);setTimeout(()=>el._busy=0,450)}));
+document.querySelectorAll('.label,.corner a,.c-tc button').forEach(el=>el.addEventListener('mouseenter',()=>{if(el._busy)return;el._busy=1;scramble(el,(el._t||el.textContent).toUpperCase(),420);setTimeout(()=>el._busy=0,450)}));
 
 /* cursor */
 const cu=$('cur');let mx=-100,my=-100,cx=-100,cy=-100;
@@ -343,7 +346,7 @@ if(!reduce&&matchMedia('(pointer:fine)').matches){
 const h=location.hash.slice(1);
 function startMain(fromIntro){
   app.classList.add('ready');
-  if(!reduce){document.querySelectorAll('.label').forEach((el,i)=>setTimeout(()=>scramble(el,el.textContent.toUpperCase(),700),500+i*120));
+  if(!reduce){document.querySelectorAll('.label').forEach((el,i)=>setTimeout(()=>scramble(el,(el._t||el.textContent).toUpperCase(),700),500+i*120));
     if(!fromIntro)scramble(document.querySelector('.c-tc button'),'[ROD  LARRAIN]',900)}
   if(['about','work','contact'].includes(h))setTimeout(()=>setOpen(h),reduce?0:900);
   else if(CASES.some(c=>c.id===h))setTimeout(()=>setOpen('work',h),reduce?0:900);
