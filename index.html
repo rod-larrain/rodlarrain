@@ -22,6 +22,8 @@
 html,body{margin:0;height:100%;background:#131313}
 *{box-sizing:border-box}
 #app{position:fixed;inset:0;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--sans);-webkit-font-smoothing:antialiased;transition:background-color .7s var(--ease),color .7s var(--ease)}
+html{-webkit-text-size-adjust:100%}
+button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;letter-spacing:inherit;text-transform:inherit}
 a{color:inherit}
 :focus-visible{outline:1px solid var(--fg);outline-offset:6px}
@@ -91,10 +93,14 @@ a{color:inherit}
 .cap .ln{font-size:clamp(13px,.8vw,15px);line-height:1.75;color:var(--text);margin:0;transition:opacity .4s}
 .cap .lk{display:inline-block;margin-top:8px;font-size:clamp(11px,.7vw,13px);color:var(--text);text-decoration:underline;text-underline-offset:3px;letter-spacing:.06em;text-transform:uppercase}
 .cap.swap .ln,.cap.swap .rl,.cap.swap .lk{opacity:0}
+.cap .ix{display:none;font-size:11px;color:var(--muted);margin:0 0 14px;letter-spacing:.3em}
+.stage.drag .w{transition:none}
 
 /* contact */
 .contact{text-align:center;padding:1.5vh 0 5vh}
-.contact .mail{font-size:clamp(17px,1.4vw,26px);margin:0 0 10px;user-select:all}
+.contact .mail{font-size:clamp(17px,1.4vw,26px);margin:0 0 10px}
+.contact .mail a{text-decoration:none;border-bottom:1px solid transparent;transition:border-color .25s}
+.contact .mail a:hover{border-bottom-color:var(--fg)}
 .contact .where{font-size:clamp(10px,.64vw,13px);color:var(--muted);text-decoration:none;padding-bottom:4px;border-bottom:1px solid var(--line);transition:color .25s,border-color .25s}
 .contact .where:hover{color:var(--fg);border-bottom-color:var(--fg)}
 
@@ -117,8 +123,34 @@ a{color:inherit}
   .c-bl{left:20px;bottom:calc(env(safe-area-inset-bottom,0px) + 20px)}.c-br{right:20px;bottom:calc(env(safe-area-inset-bottom,0px) + 28px)}
   .about{flex-direction:column;align-items:flex-start;gap:18px;padding:3vh 20px 4vh}
   .about .pic{width:38vw}.about p{width:auto;min-width:0}.about p+p{margin-left:0}
-  .stage{height:48vw}.w{width:16vw}.w.r1{width:20vw}.w.r0{width:64vw}
-  .stack{max-height:calc(100% - 180px);overflow-y:auto}
+  .label{font-size:14px;padding:13px 28px}
+  .corner{font-size:11px}.c-tc{font-size:13px}
+  .corner a,.corner button{display:inline-block;padding:12px;margin:-12px}
+  .about{align-items:center;gap:22px;padding:2vh 24px 3vh}
+  .about .pic{width:min(62vw,300px)}.about p{font-size:15.5px;line-height:1.7;max-width:520px}
+  .stage{height:61vw}.w{width:30vw}.w.r1{width:30vw}.w.r0{width:76vw}
+  .w:not(.r0) img{filter:brightness(.6)}
+  .cap{margin-top:22px;width:auto;padding:0 28px;max-width:520px}
+  .cap .ix{display:block}
+  .cap .nm{font-size:13px;white-space:normal;line-height:1.7}
+  .cap .rl{font-size:14px;margin:8px 0 18px}
+  .cap .ln{font-size:15px;line-height:1.7}
+  .contact .mail{font-size:20px}.contact .where{font-size:11px;display:inline-block;padding:10px 4px}
+  .stack{max-height:calc(100% - 200px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .stack::-webkit-scrollbar{display:none}
+  .stack.more{-webkit-mask-image:linear-gradient(#000 calc(100% - 36px),transparent);mask-image:linear-gradient(#000 calc(100% - 36px),transparent)}
+}
+@media (max-width:760px) and (max-height:700px){
+  .c-tc{top:calc(env(safe-area-inset-top,0px) + 52px)}
+  .label{padding:10px 28px}
+  .about .pic{width:min(46vw,220px)}
+  .stack{max-height:calc(100% - 176px)}
+}
+@media (max-height:480px) and (orientation:landscape){
+  .c-tl,.c-tr,.c-tc{top:calc(env(safe-area-inset-top,0px) + 14px)}
+  .c-bl{bottom:12px}.c-br{bottom:18px}
+  .stack{max-height:calc(100% - 96px);overflow-y:auto;scrollbar-width:none}
+  .label{padding:8px 28px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.cur{display:none}}
 </style>
@@ -160,7 +192,7 @@ a{color:inherit}
       <button class="label mono" data-open="contact" data-k="contact" style="transition-delay:.74s">Contact</button>
       <div class="panel"><div class="in">
         <div class="contact">
-          <p class="mail rv" style="--d:1">rodrigo@rlastudio.co</p>
+          <p class="mail rv" style="--d:1"><a href="mailto:rodrigo@rlastudio.co">rodrigo@rlastudio.co</a></p>
           <p class="rv" style="--d:2"><a class="where mono" href="https://www.linkedin.com/in/rodlarrain" target="_blank" rel="noopener" data-k="connect">LinkedIn</a></p>
         </div>
       </div></div>
@@ -259,7 +291,7 @@ function targets(){
   let v=defV;
   if(open==='work'){const c=stage.querySelector('.r0');if(c){const r=c.getBoundingClientRect(),n1=stage.querySelectorAll('.r1');
     const a=n1[0]&&n1[0].getBoundingClientRect(),b=n1[1]&&n1[1].getBoundingClientRect();
-    const xs=[x(r.left),x(r.right)];if(a&&b){const l=Math.min(a.left,b.left),rr=Math.max(a.right,b.right);v=[x(l)-18,xs[0],xs[1],x(rr)+18]}else v=[defV[0],xs[0],xs[1],defV[3]]}}
+    const xs=[x(r.left),x(r.right)];if(a&&b&&mob()){const L1=Math.min(a.right,b.right),R1=Math.max(a.left,b.left);v=[x(L1),xs[0],xs[1],x(R1)]}else if(a&&b){const l=Math.min(a.left,b.left),rr=Math.max(a.right,b.right);v=[x(l)-18,xs[0],xs[1],x(rr)+18]}else v=[defV[0],xs[0],xs[1],defV[3]]}}
   if(open==='about'){const pic=document.querySelector('.about .pic').getBoundingClientRect(),ps=document.querySelectorAll('.about p');
     if(ps.length===2&&innerWidth>760){const p1=ps[0].getBoundingClientRect(),p2=ps[1].getBoundingClientRect();v=[x(pic.left),x(pic.right)+(p1.left-pic.right)/2,x(p1.right)+(p2.left-p1.right)/2,x(p2.right)]}}
   return[v,h];
@@ -280,18 +312,25 @@ $('mode').onclick=()=>{const m=app.dataset.mode==='dark'?'light':'dark';app.data
 const stage=$('stage'),cap=$('cap');let cur=2;
 CASES.forEach((c,k)=>{const b=document.createElement('button');b.className='w';b.setAttribute('aria-label',c.name);
   b.innerHTML=`<img src="${c.img}" alt="" draggable="false">`;b.onclick=()=>{if(k!==cur)setCur(k)};stage.appendChild(b)});
-const X={'-2':10.6,'-1':26.1,'0':50,'1':73.6,'2':89};
+const X={'-2':10.6,'-1':26.1,'0':50,'1':73.6,'2':89},XM={'-1':-6,'0':50,'1':106};
+const mob=()=>innerWidth<=760;
+function place(){const m=mob(),P=m?XM:X;
+  [...stage.children].forEach((el,k)=>{let r=((k-cur)%N+N)%N;if(r>N/2)r-=N;const a=Math.abs(r),lim=m?1:2;
+    el.className='w'+(a===0?' r0':a===1?' r1':a<=lim?'':' out');
+    el.style.left=(P[r]!==undefined?P[r]:(r<0?(m?-40:-8):(m?140:108)))+'vw';el.tabIndex=a<=lim?0:-1})}
+addEventListener('resize',()=>{if(stage.children.length)place()});
+{const sk=document.getElementById('stack'),chk=()=>sk.classList.toggle('more',sk.scrollHeight-sk.scrollTop-sk.clientHeight>8);sk.addEventListener('scroll',chk,{passive:true});addEventListener('resize',chk);setInterval(chk,400)}
 function layout(first){
-  [...stage.children].forEach((el,k)=>{let r=((k-cur)%N+N)%N;if(r>N/2)r-=N;const a=Math.abs(r);
-    el.className='w'+(a===0?' r0':a===1?' r1':a===2?'':' out');
-    el.style.left=(X[r]!==undefined?X[r]:(r<0?-8:108))+'vw';el.tabIndex=a<=2?0:-1;
+  place();
+  [...stage.children].forEach((el,k)=>{let r=((k-cur)%N+N)%N;if(r>N/2)r-=N;
     el.style.transitionDelay=first?`left 0s, width 0s, opacity 0s, clip-path ${0.15+(r+2)*0.08}s`:'';
     if(first)el.style.transitionDelay=`0s,0s,0s,${0.2+(Math.max(-2,Math.min(2,r))+2)*0.09}s`;});
   renderCap();
 }
 function renderCap(){
   const c=CASES[cur],city=lang==='es'?(CITY[c.city]||c.city):c.city,role=lang==='es'?(ROLE[c.role]||c.role):c.role;
-  if(!cap.firstChild){cap.innerHTML='<p class="nm mono"></p><p class="rl"></p><p class="ln"></p><a class="lk"></a>'}
+  if(!cap.firstChild){cap.innerHTML='<p class="ix mono"></p><p class="nm mono"></p><p class="rl"></p><p class="ln"></p><a class="lk"></a>'}
+  cap.querySelector('.ix').textContent=String(cur+1).padStart(2,'0')+' / '+String(N).padStart(2,'0');
   cap.classList.add('swap');
   scramble(cap.querySelector('.nm'),(c.name+'  '+city).toUpperCase(),520);
   setTimeout(()=>{cap.querySelector('.rl').textContent=role;cap.querySelector('.ln').textContent=c[lang];
@@ -299,8 +338,13 @@ function renderCap(){
     cap.classList.remove('swap')},260);
 }
 function setCur(k){cur=(k+N)%N;layout();try{if(open==='work')history.replaceState(null,'','#'+CASES[cur].id)}catch(e){}}
-let sx=null;stage.addEventListener('pointerdown',e=>{sx=e.clientX});
-addEventListener('pointerup',e=>{if(sx===null)return;const dx=e.clientX-sx;sx=null;if(open==='work'&&Math.abs(dx)>40)setCur(cur+(dx<0?1:-1))});
+let sx=null,sy=0;stage.addEventListener('pointerdown',e=>{sx=e.clientX;sy=e.clientY});
+stage.addEventListener('pointermove',e=>{if(sx===null||e.pointerType==='mouse')return;const dx=e.clientX-sx;
+  if(Math.abs(dx)>6){stage.classList.add('drag');stage.style.transform=`translateX(${dx*.45}px)`}});
+function endDrag(){stage.classList.remove('drag');stage.style.transition='transform .6s var(--ease)';stage.style.transform='';setTimeout(()=>stage.style.transition='',600)}
+addEventListener('pointerup',e=>{if(sx===null)return;const dx=e.clientX-sx,dy=e.clientY-sy;sx=null;endDrag();
+  if(open==='work'&&Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy))setCur(cur+(dx<0?1:-1))});
+addEventListener('pointercancel',()=>{if(sx!==null){sx=null;endDrag()}});
 let lock=0;stage.addEventListener('wheel',e=>{if(Math.abs(e.deltaX)<=Math.abs(e.deltaY)||Math.abs(e.deltaX)<10||Date.now()<lock)return;lock=Date.now()+650;setCur(cur+(e.deltaX>0?1:-1))},{passive:true});
 
 /* accordion */
@@ -310,6 +354,7 @@ function setOpen(k,caseId){
   open=k;
   ['about','work','contact'].forEach(n=>{const it=$('i-'+n),on=n===k;it.classList.toggle('open',on);
     if(on){setTimeout(()=>it.classList.add('shown'),reduce?0:140)}else it.classList.remove('shown')});
+  const sk=$('stack');if(sk.scrollHeight>sk.clientHeight+2){if(!k)sk.scrollTo({top:0,behavior:'smooth'});else setTimeout(()=>sk.scrollTo({top:$('i-'+k).offsetTop,behavior:reduce?'auto':'smooth'}),reduce?0:420)}
   if(k==='work'){if(caseId)cur=CASES.findIndex(c=>c.id===caseId);[...stage.children].forEach(el=>el.style.transitionDelay='');layout(true)}
   try{history.replaceState(null,'',!k?location.pathname:'#'+(k==='work'?CASES[cur].id:k))}catch(e){}
 }
@@ -333,7 +378,7 @@ $('lang').onclick=()=>{lang=lang==='en'?'es':'en';applyLang(true)};
 applyLang(false);
 
 /* hover decode on mono links */
-document.querySelectorAll('.label,.corner a,.c-tc button').forEach(el=>el.addEventListener('mouseenter',()=>{if(el._busy)return;el._busy=1;scramble(el,(el._t||el.textContent).toUpperCase(),420);setTimeout(()=>el._busy=0,450)}));
+if(matchMedia('(hover:hover)').matches)document.querySelectorAll('.label,.corner a,.c-tc button').forEach(el=>el.addEventListener('mouseenter',()=>{if(el._busy)return;el._busy=1;scramble(el,(el._t||el.textContent).toUpperCase(),420);setTimeout(()=>el._busy=0,450)}));
 
 /* cursor */
 const cu=$('cur');let mx=-100,my=-100,cx=-100,cy=-100;
