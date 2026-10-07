@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Rod Larrain. Brand builder, advisor and investor based in New York.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Rod Larrain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=DM+Sans:opsz,wght@9..40,400&display=swap">
+<style>
+/* Layout: fixed frame on a 5 by 5 grid of hairlines. Corners: NYC clock, [ROD LARRAIN], LinkedIn, mode toggle, language.
+   Center: About / Work / Contact stacked; each opens in place like an accordion and the stack recenters.
+   Motion: lines draw in, mono labels decode, panels unfold, images wipe in, carousel glides. Dark first, own light toggle. */
+:root{color-scheme:dark;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;--sans:"DM Sans","Helvetica Neue",Helvetica,Arial,sans-serif;--ease:cubic-bezier(.16,.84,.24,1)}
+#app{--bg:#131313;--fg:#e9e9e9;--text:#c6c6c6;--muted:#858585;--line:rgba(255,255,255,.055)}
+#app[data-mode="light"]{--bg:#efefef;--fg:#141414;--text:#383838;--muted:#7a7a7a;--line:rgba(0,0,0,.07)}
+html,body{margin:0;height:100%;background:#131313}
+*{box-sizing:border-box}
+#app{position:fixed;inset:0;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--sans);-webkit-font-smoothing:antialiased;transition:background-color .7s var(--ease),color .7s var(--ease)}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;letter-spacing:inherit;text-transform:inherit}
+a{color:inherit}
+:focus-visible{outline:1px solid var(--fg);outline-offset:6px}
+.mono{font-family:var(--mono);font-weight:500;text-transform:uppercase;letter-spacing:.42em;white-space:nowrap}
+
+/* grid hairlines */
+.lines{position:absolute;inset:0;pointer-events:none}
+.lines i{position:absolute;background:var(--line);transition:transform 1.6s var(--ease),background-color .7s}
+.lines .v{top:0;bottom:0;width:1px;transform:scaleY(0);transform-origin:top}
+.lines .h{left:0;right:0;height:1px;transform:scaleX(0);transform-origin:left}
+.ready .lines i{transform:none}
+
+/* corners */
+.corner{position:absolute;z-index:6;font-size:clamp(10px,.64vw,13px);opacity:0;transform:translateY(-6px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.ready .corner{opacity:1;transform:none}
+.c-tl{top:calc(env(safe-area-inset-top,0px) + 7.6vh);left:3.2vw}
+.c-tc{top:calc(env(safe-area-inset-top,0px) + 7.6vh);left:50%;transform:translate(-50%,-6px);font-size:clamp(12px,.86vw,17px)}
+.ready .c-tc{transform:translate(-50%,0)}
+.c-tr{top:calc(env(safe-area-inset-top,0px) + 7.6vh);right:5.1vw}
+.c-bl{bottom:calc(env(safe-area-inset-bottom,0px) + 3.2vh);left:4.8vw;transform:translateY(6px)}
+.c-br{bottom:calc(env(safe-area-inset-bottom,0px) + 4.2vh);right:5.5vw;transform:translateY(6px)}
+.corner a,.corner button{opacity:.85;transition:opacity .25s;text-decoration:none}
+.corner a:hover,.corner button:hover{opacity:1}
+.blink{animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.toggle{width:clamp(28px,1.8vw,36px);height:clamp(28px,1.8vw,36px);display:block;transition:transform .9s var(--ease)}
+.toggle circle{stroke:var(--fg);fill:none;stroke-width:1.6;transition:stroke .7s}
+.toggle path{fill:var(--fg);transition:fill .7s}
+#app[data-mode="light"] .toggle{transform:rotate(180deg)}
+
+/* stack */
+.stack{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;z-index:3}
+.item{width:100%;display:flex;flex-direction:column;align-items:center}
+.label{font-size:clamp(13px,.92vw,18px);padding:.85em 0;opacity:0;transform:translateY(10px);transition:opacity .9s var(--ease),transform .9s var(--ease),color .3s}
+.ready .label{opacity:.9;transform:none}
+.label:hover{opacity:1}
+.item.open .label{opacity:1}
+.panel{display:grid;grid-template-rows:0fr;width:100%;transition:grid-template-rows 1.1s var(--ease)}
+.item.open .panel{grid-template-rows:1fr}
+.panel>.in{overflow:hidden;min-height:0}
+.rv{opacity:0;transform:translateY(22px);transition:opacity .9s var(--ease),transform 1.1s var(--ease);transition-delay:calc(var(--d,0) * 90ms)}
+.item.shown .rv{opacity:1;transform:none}
+
+/* about */
+.about{display:flex;justify-content:center;align-items:center;gap:2.8vw;padding:6vh 4vw 7vh}
+.about .pic{width:16.6vw;min-width:150px;flex:none;aspect-ratio:332/400;overflow:hidden;clip-path:inset(100% 0 0 0);transition:clip-path 1.3s var(--ease) .15s}
+.item.shown .about .pic{clip-path:inset(0)}
+.about .pic img{width:100%;height:100%;object-fit:cover;object-position:52% 32%;filter:grayscale(1) contrast(1.05);display:block;transform:scale(1.15);transition:transform 2.2s var(--ease) .15s}
+.item.shown .about .pic img{transform:none}
+.about p{width:26vw;min-width:240px;margin:0;font-size:clamp(14px,.9vw,18px);line-height:1.78;color:var(--text)}
+.about p+p{margin-left:1.5vw}
+
+/* work */
+.work{padding:1.5vh 0 4vh}
+.stage{position:relative;height:20.2vw;touch-action:pan-y;user-select:none}
+.w{position:absolute;top:50%;left:50%;width:10.4vw;aspect-ratio:4/3;overflow:hidden;transform:translate(-50%,-50%);cursor:pointer;
+  transition:left 1s var(--ease),width 1s var(--ease),opacity .8s var(--ease),clip-path 1.2s var(--ease);clip-path:inset(0 0 100% 0)}
+.item.shown .w{clip-path:inset(0)}
+.w img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.12);transition:transform 1.6s var(--ease),filter .8s}
+.w.r0 img{transform:scale(1)}
+.w.r1{width:17vw}.w.r0{width:26.9vw;cursor:grab}
+.w.out{opacity:0;pointer-events:none}
+.w:not(.r0) img{filter:brightness(.82)}
+.cap{text-align:center;width:min(88vw,450px);margin:3.4vh auto 0}
+.cap .nm{font-size:clamp(13px,1.02vw,20px);margin:0;opacity:.92}
+.cap .rl{font-size:clamp(13px,.8vw,15px);color:var(--text);margin:6px 0 22px}
+.cap .ln{font-size:clamp(13px,.8vw,15px);line-height:1.75;color:var(--text);margin:0;transition:opacity .4s}
+.cap .lk{display:inline-block;margin-top:8px;font-size:clamp(11px,.7vw,13px);color:var(--text);text-decoration:underline;text-underline-offset:3px;letter-spacing:.06em;text-transform:uppercase}
+.cap.swap .ln,.cap.swap .rl,.cap.swap .lk{opacity:0}
+
+/* contact */
+.contact{text-align:center;padding:1.5vh 0 5vh}
+.contact .mail{font-size:clamp(17px,1.4vw,26px);margin:0 0 10px;user-select:all}
+.contact .where{font-size:clamp(10px,.64vw,13px);color:var(--muted);text-decoration:none;padding-bottom:4px;border-bottom:1px solid var(--line);transition:color .25s,border-color .25s}
+.contact .where:hover{color:var(--fg);border-bottom-color:var(--fg)}
+
+/* first visit intro: brackets open on the name, then it flies up to the header */
+.intro{position:absolute;inset:0;z-index:40;display:grid;place-items:center;background:var(--bg);cursor:default}
+.intro .row{display:flex;align-items:center;font-size:clamp(12px,.86vw,17px);color:var(--fg);transform:scale(1.8);transition:transform 1.15s var(--ease)}
+.intro .b{opacity:0;transition:opacity .6s var(--ease)}
+.intro.on .b{opacity:1}
+.intro .nm{display:inline-block;overflow:hidden;white-space:nowrap;width:0;transition:width 1.25s var(--ease)}
+.intro .t{display:inline-block}
+
+/* cursor */
+.cur{position:absolute;z-index:30;left:0;top:0;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--fg);pointer-events:none;mix-blend-mode:difference;transition:width .35s var(--ease),height .35s var(--ease),margin .35s var(--ease),opacity .3s;opacity:0}
+.cur.big{width:44px;height:44px;margin:-22px 0 0 -22px}
+@media (pointer:coarse){.cur{display:none}}
+
+@media (max-width:760px){
+  .c-tl{left:20px;top:calc(env(safe-area-inset-top,0px) + 26px)}.c-tr{right:20px;top:calc(env(safe-area-inset-top,0px) + 26px)}
+  .c-tc{top:calc(env(safe-area-inset-top,0px) + 60px)}
+  .c-bl{left:20px;bottom:calc(env(safe-area-inset-bottom,0px) + 20px)}.c-br{right:20px;bottom:calc(env(safe-area-inset-bottom,0px) + 28px)}
+  .about{flex-direction:column;align-items:flex-start;gap:18px;padding:3vh 20px 4vh}
+  .about .pic{width:38vw}.about p{width:auto;min-width:0}.about p+p{margin-left:0}
+  .stage{height:48vw}.w{width:16vw}.w.r1{width:20vw}.w.r0{width:64vw}
+  .stack{max-height:calc(100% - 180px);overflow-y:auto}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.cur{display:none}}
+</style>
+
+</head>
+<body>
+<div id="app" data-mode="dark">
+  <div class="lines" id="lines"></div>
+
+  <div class="corner c-tl mono"><span id="clock">NYC 0<span class="blink">:</span>00</span></div>
+  <div class="corner c-tc mono"><button data-close data-scr="[Rod  Larrain]">[Rod&nbsp;&nbsp;Larrain]</button></div>
+  <div class="corner c-tr mono"><a href="https://www.linkedin.com/in/rodlarrain" target="_blank" rel="noopener" data-scr="LinkedIn">LinkedIn</a></div>
+  <div class="corner c-bl"><button id="mode" aria-label="Switch light or dark"><svg class="toggle" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16.5"/><path d="M18 1.5 A16.5 16.5 0 0 1 18 34.5 Z"/></svg></button></div>
+  <div class="corner c-br mono"><button id="lang" aria-label="Cambiar a español">Eng</button></div>
+
+  <main class="stack" id="stack">
+    <section class="item" id="i-about">
+      <button class="label mono" data-open="about" data-k="about" style="transition-delay:.5s">About</button>
+      <div class="panel"><div class="in">
+        <div class="about">
+          <div class="pic"><img src="rod.jpg" alt="Rod Larrain in his New York studio"></div>
+          <p class="rv" style="--d:3" data-k="p1"></p>
+          <p class="rv" style="--d:5" data-k="p2"></p>
+        </div>
+      </div></div>
+    </section>
+
+    <section class="item" id="i-work">
+      <button class="label mono" data-open="work" data-k="work" style="transition-delay:.62s">Work</button>
+      <div class="panel"><div class="in">
+        <div class="work">
+          <div class="stage" id="stage"></div>
+          <div class="cap rv" style="--d:4" id="cap" aria-live="polite"></div>
+        </div>
+      </div></div>
+    </section>
+
+    <section class="item" id="i-contact">
+      <button class="label mono" data-open="contact" data-k="contact" style="transition-delay:.74s">Contact</button>
+      <div class="panel"><div class="in">
+        <div class="contact">
+          <p class="mail rv" style="--d:1">rodrigo@rlastudio.co</p>
+          <p class="rv" style="--d:2"><a class="where mono" href="https://www.linkedin.com/in/rodlarrain" target="_blank" rel="noopener" data-k="connect">LinkedIn</a></p>
+        </div>
+      </div></div>
+    </section>
+  </main>
+
+  <div class="cur" id="cur"></div>
+</div>
+
+<script>
+const T={
+ en:{about:"About",work:"Work",contact:"Contact",lang:"Eng",link:"Link",connect:"LinkedIn",
+  p1:"I'm a brand builder based in New York. For twenty years I have worked next to founders, talent and the agencies behind some of America's best known brands, turning early ideas into names, identities and launches people line up for.",
+  p2:"I work with a small number of founders at a time, usually from the first conversation, and I stay in long after launch. With the right ones, I invest and build alongside them."},
+ es:{about:"Sobre mí",work:"Trabajo",contact:"Contacto",lang:"Esp",link:"Enlace",connect:"LinkedIn",
+  p1:"Soy un creador de marcas basado en Nueva York. Durante veinte años he trabajado junto a fundadores, talento y las agencias detrás de algunas de las marcas más conocidas de Estados Unidos, convirtiendo ideas tempranas en nombres, identidades y lanzamientos por los que la gente hace fila.",
+  p2:"Trabajo con pocos fundadores a la vez, casi siempre desde la primera conversación, y me quedo mucho después del lanzamiento. Con los indicados, invierto y construyo junto a ellos."}
+};
+const ROLE={"Creative Advisor, Investor":"Asesor creativo, Inversionista","Global Creative Director, Investor":"Director creativo global, Inversionista","Partner, Investor, Creative Director":"Socio, Inversionista, Director creativo","Cocreator":"Cocreador","Brand Creation":"Creación de marca","Brand Rebuild":"Rediseño de marca"};
+const CITY={"Los Angeles":"Los Ángeles","New York":"Nueva York","United States":"Estados Unidos"};
+const CASES=[
+ {id:"syrn",img:"work/syrn.jpg",name:"SYRN",city:"Los Angeles",role:"Creative Advisor, Investor",
+  en:"Sydney Sweeney's lingerie brand. Built from zero with Sydney: name, strategy, visual identity and launch. Sold out on launch day.",
+  es:"La marca de lencería de Sydney Sweeney. Construida desde cero con Sydney: nombre, estrategia, identidad visual y lanzamiento. Agotada el día del lanzamiento."},
+ {id:"tigerfire",img:"work/tigerfire.jpg",name:"TIGERFIRE",city:"India",role:"Global Creative Director, Investor",url:"https://tigerfirevodka.com",
+  en:"Bollywood star Sanjay Dutt's premium vodka. Packaging and identity awarded at the ET Brand Equity Design and Creative Awards 2026. Launched in India in 2025 and the US in 2026.",
+  es:"El vodka premium de la estrella de Bollywood Sanjay Dutt. Packaging e identidad premiados en los ET Brand Equity Design and Creative Awards 2026. Lanzado en India en 2025 y en Estados Unidos en 2026."},
+ {id:"sensa",img:"work/sensa.jpg",name:"Sensa",city:"Miami",role:"Partner, Investor, Creative Director",url:"https://sensaspas.com",
+  en:"Miami's largest premium bathhouse, medspa and style bar, in Wynwood. Opening November 2026, with Sol by Sensa, its premium wellness line.",
+  es:"El bathhouse, medspa y style bar premium más grande de Miami, en Wynwood. Abre en noviembre de 2026, junto a Sol by Sensa, su línea premium de bienestar."},
+ {id:"satya",img:"work/satya.jpg",name:"SATYA",city:"New York",role:"Partner, Investor, Creative Director",url:"https://livesatya.com",
+  en:"A neurotechnology design platform that restores the nervous system to its natural state. Brand built from scratch; now designing its product line.",
+  es:"Una plataforma de diseño en neurotecnología que devuelve el sistema nervioso a su estado natural. Marca construida desde cero; hoy diseñando su línea de productos."},
+ {id:"mit",img:"work/mit.jpg",name:"MIT",city:"Cambridge",role:"Cocreator",url:"https://curiositymission.org",
+  en:"MIT's national campaign for curiosity driven university science, and the case for the public funding behind it. Cocreated with a team of four, launched May 2026.",
+  es:"La campaña nacional del MIT a favor de la ciencia universitaria movida por la curiosidad y del financiamiento público que la sostiene. Cocreada por un equipo de cuatro, lanzada en mayo de 2026."},
+ {id:"afa",img:"work/afa.jpg",name:"Artists for Artists",city:"Los Angeles",role:"Brand Creation",url:"https://www.afauniverse.com",
+  en:"Kenan Thompson's production company. Brand identity, website, and the animated studio intro that runs on Amazon Prime.",
+  es:"La productora de Kenan Thompson. Identidad de marca, sitio web y la intro animada del estudio que corre en Amazon Prime."},
+ {id:"nyctech",img:"work/nyctech.jpg",name:"NYC Tech Awards",city:"New York",role:"Brand Creation",
+  en:"Primary Venture Partners' awards for New York's tech community. The full brand identity.",
+  es:"Los premios de Primary Venture Partners para la comunidad tecnológica de Nueva York. La identidad de marca completa."},
+ {id:"mobius",img:"work/mobius.jpg",name:"The Möbius",city:"Miami",role:"Brand Creation",
+  en:"A wellness residential tower at Miami Worldcenter, for Lynd Living.",
+  es:"Una torre residencial de bienestar en Miami Worldcenter, para Lynd Living."},
+ {id:"aileron",img:"work/aileron.jpg",name:"Aileron",city:"Dania Beach",role:"Brand Creation",url:"https://aileronresidences.com",
+  en:"A waterfront residential tower in Dania Beach, for Lynd Living. The full brand, from name to launch.",
+  es:"Una torre residencial frente al agua en Dania Beach, para Lynd Living. La marca completa, del nombre al lanzamiento."},
+ {id:"josephine",img:"work/josephine.jpg",name:"The Josephine",city:"San Antonio",role:"Brand Creation",url:"https://www.livejosephine.com",
+  en:"Luxury residences by the Pearl District in downtown San Antonio, for Lynd Living. The full brand, from name to launch.",
+  es:"Residencias de lujo junto al Pearl District, en el centro de San Antonio, para Lynd Living. La marca completa, del nombre al lanzamiento."},
+ {id:"amandine",img:"work/amandine.jpg",name:"Amandine",city:"Santiago",role:"Brand Creation",
+  en:"A French bistro inside Hyatt Centric Las Condes, Santiago.",
+  es:"Un bistró francés dentro del Hyatt Centric Las Condes, Santiago."},
+ {id:"animal",img:"work/animal.jpg",name:"Animal",city:"Los Angeles",role:"Brand Creation",
+  en:"A cannabis brand for Final Bell, Los Angeles.",
+  es:"Una marca de cannabis para Final Bell, Los Ángeles."},
+ {id:"dosist",img:"work/dosist.jpg",name:"Dosist",city:"Los Angeles",role:"Brand Rebuild",
+  en:"A dose controlled wellness brand. A brand universe and national product launches.",
+  es:"Una marca de bienestar de dosis controlada. Un universo de marca y lanzamientos nacionales de producto."},
+ {id:"happly",img:"work/happly.jpg",name:"Happly",city:"United States",role:"Brand Creation",
+  en:"Mood targeted hemp gummies for Organigram.",
+  es:"Gomitas de cáñamo según el estado de ánimo, para Organigram."}
+];
+const N=CASES.length,$=id=>document.getElementById(id),app=$('app');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let lang='en';
+
+/* decode effect */
+const GLYPHS='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#/[]+';
+function scramble(el,text,dur=650){
+  if(reduce){el.textContent=text;return}
+  const len=text.length,start=performance.now();cancelAnimationFrame(el._r);
+  (function f(now){const p=Math.min(1,(now-start)/dur);let o='';
+    for(let i=0;i<len;i++){const ch=text[i];if(ch===' '){o+=' ';continue}
+      o+= i<p*len ? ch : GLYPHS[(Math.random()*GLYPHS.length)|0]}
+    el.textContent=o.replace(/  /g,'  ');if(p<1)el._r=requestAnimationFrame(f)})(start);
+}
+
+/* grid lines */
+const L=$('lines');
+[20,40,60,80].forEach((p,i)=>{L.insertAdjacentHTML('beforeend',`<i class="v" style="left:${p}%;transition-delay:${i*90}ms"></i><i class="h" style="top:${p}%;transition-delay:${200+i*90}ms"></i>`)});
+/* lines follow the content: horizontals bracket the open panel, verticals lock to its key edges */
+const VL=[...L.querySelectorAll('.v')],HL=[...L.querySelectorAll('.h')];
+const posV=[.2,.4,.6,.8].map(f=>f*innerWidth),posH=[.2,.4,.6,.8].map(f=>f*innerHeight);
+function targets(){
+  const W=app.clientWidth,H=app.clientHeight,defV=[.2,.4,.6,.8].map(f=>f*W),defH=[.2,.4,.6,.8].map(f=>f*H);
+  if(!open)return[defV,defH];
+  const ar=app.getBoundingClientRect(),st=$('stack').getBoundingClientRect(),pin=document.querySelector('#i-'+open+' .panel>.in').getBoundingClientRect();
+  if(pin.height<4)return[defV,defH];
+  const y=v=>v-ar.top,x=v=>v-ar.left;
+  const h=[Math.max(4,y(st.top)-22),y(pin.top),y(pin.bottom),Math.min(H-4,y(st.bottom)+22)];
+  let v=defV;
+  if(open==='work'){const c=stage.querySelector('.r0');if(c){const r=c.getBoundingClientRect(),n1=stage.querySelectorAll('.r1');
+    const a=n1[0]&&n1[0].getBoundingClientRect(),b=n1[1]&&n1[1].getBoundingClientRect();
+    const xs=[x(r.left),x(r.right)];if(a&&b){const l=Math.min(a.left,b.left),rr=Math.max(a.right,b.right);v=[x(l)-18,xs[0],xs[1],x(rr)+18]}else v=[defV[0],xs[0],xs[1],defV[3]]}}
+  if(open==='about'){const pic=document.querySelector('.about .pic').getBoundingClientRect(),ps=document.querySelectorAll('.about p');
+    if(ps.length===2&&innerWidth>760){const p1=ps[0].getBoundingClientRect(),p2=ps[1].getBoundingClientRect();v=[x(pic.left),x(pic.right)+(p1.left-pic.right)/2,x(p1.right)+(p2.left-p1.right)/2,x(p2.right)]}}
+  return[v,h];
+}
+function follow(){const [tv,th]=targets(),k=reduce?1:.09;
+  for(let i=0;i<4;i++){posV[i]+=(tv[i]-posV[i])*k;posH[i]+=(th[i]-posH[i])*k;VL[i].style.left=posV[i].toFixed(1)+'px';HL[i].style.top=posH[i].toFixed(1)+'px'}
+  requestAnimationFrame(follow)}
+requestAnimationFrame(follow);
+
+/* clock */
+function tick(){try{const s=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit',hour12:true}).format(new Date()).replace(/\s?[AP]M/,'');const [hh,mm]=s.split(':');$('clock').innerHTML=`NYC ${hh}<span class="blink">:</span>${mm}`}catch(e){}}
+tick();setInterval(tick,10000);
+
+/* mode */
+$('mode').onclick=()=>{const m=app.dataset.mode==='dark'?'light':'dark';app.dataset.mode=m;document.documentElement.style.background=m==='dark'?'#131313':'#efefef';document.documentElement.style.colorScheme=m};
+
+/* carousel */
+const stage=$('stage'),cap=$('cap');let cur=2;
+CASES.forEach((c,k)=>{const b=document.createElement('button');b.className='w';b.setAttribute('aria-label',c.name);
+  b.innerHTML=`<img src="${c.img}" alt="" draggable="false">`;b.onclick=()=>{if(k!==cur)setCur(k)};stage.appendChild(b)});
+const X={'-2':10.6,'-1':26.1,'0':50,'1':73.6,'2':89};
+function layout(first){
+  [...stage.children].forEach((el,k)=>{let r=((k-cur)%N+N)%N;if(r>N/2)r-=N;const a=Math.abs(r);
+    el.className='w'+(a===0?' r0':a===1?' r1':a===2?'':' out');
+    el.style.left=(X[r]!==undefined?X[r]:(r<0?-8:108))+'vw';el.tabIndex=a<=2?0:-1;
+    el.style.transitionDelay=first?`left 0s, width 0s, opacity 0s, clip-path ${0.15+(r+2)*0.08}s`:'';
+    if(first)el.style.transitionDelay=`0s,0s,0s,${0.2+(Math.max(-2,Math.min(2,r))+2)*0.09}s`;});
+  renderCap();
+}
+function renderCap(){
+  const c=CASES[cur],city=lang==='es'?(CITY[c.city]||c.city):c.city,role=lang==='es'?(ROLE[c.role]||c.role):c.role;
+  if(!cap.firstChild){cap.innerHTML='<p class="nm mono"></p><p class="rl"></p><p class="ln"></p><a class="lk"></a>'}
+  cap.classList.add('swap');
+  scramble(cap.querySelector('.nm'),(c.name+'  '+city).toUpperCase(),520);
+  setTimeout(()=>{cap.querySelector('.rl').textContent=role;cap.querySelector('.ln').textContent=c[lang];
+    const lk=cap.querySelector('.lk');if(c.url){lk.href=c.url;lk.textContent=T[lang].link;lk.hidden=false}else{lk.hidden=true;lk.removeAttribute('href')}
+    cap.classList.remove('swap')},260);
+}
+function setCur(k){cur=(k+N)%N;layout();try{if(open==='work')history.replaceState(null,'','#'+CASES[cur].id)}catch(e){}}
+let sx=null;stage.addEventListener('pointerdown',e=>{sx=e.clientX});
+addEventListener('pointerup',e=>{if(sx===null)return;const dx=e.clientX-sx;sx=null;if(open==='work'&&Math.abs(dx)>40)setCur(cur+(dx<0?1:-1))});
+let lock=0;stage.addEventListener('wheel',e=>{if(Math.abs(e.deltaX)<=Math.abs(e.deltaY)||Math.abs(e.deltaX)<10||Date.now()<lock)return;lock=Date.now()+650;setCur(cur+(e.deltaX>0?1:-1))},{passive:true});
+
+/* accordion */
+let open=null;
+function setOpen(k,caseId){
+  if(open===k&&!caseId)k=null;
+  open=k;
+  ['about','work','contact'].forEach(n=>{const it=$('i-'+n),on=n===k;it.classList.toggle('open',on);
+    if(on){setTimeout(()=>it.classList.add('shown'),reduce?0:140)}else it.classList.remove('shown')});
+  if(k==='work'){if(caseId)cur=CASES.findIndex(c=>c.id===caseId);[...stage.children].forEach(el=>el.style.transitionDelay='');layout(true)}
+  try{history.replaceState(null,'',!k?location.pathname:'#'+(k==='work'?CASES[cur].id:k))}catch(e){}
+}
+document.addEventListener('click',e=>{
+  const o=e.target.closest('[data-open]');if(o){setOpen(o.dataset.open);return}
+  if(e.target.closest('[data-close]'))setOpen(null);
+});
+document.addEventListener('keydown',e=>{if(open==='work'){if(e.key==='ArrowRight')setCur(cur+1);if(e.key==='ArrowLeft')setCur(cur-1)}if(e.key==='Escape')setOpen(null)});
+
+/* language */
+function applyLang(animate){
+  const t=T[lang];
+  document.querySelectorAll('[data-k]').forEach(el=>{const v=t[el.dataset.k];if(v===undefined)return;
+    if(el.classList.contains('mono')&&animate)scramble(el,v.toUpperCase(),600);else el.textContent=v});
+  const lb=$('lang');animate?scramble(lb,t.lang.toUpperCase(),400):lb.textContent=t.lang;
+  lb.setAttribute('aria-label',lang==='en'?'Cambiar a español':'Switch to English');
+  document.documentElement.lang=lang;
+  if(cap.firstChild)renderCap();
+}
+$('lang').onclick=()=>{lang=lang==='en'?'es':'en';applyLang(true)};
+applyLang(false);
+
+/* hover decode on mono links */
+document.querySelectorAll('.label,.corner a,.c-tc button').forEach(el=>el.addEventListener('mouseenter',()=>{if(el._busy)return;el._busy=1;scramble(el,el.textContent.toUpperCase(),420);setTimeout(()=>el._busy=0,450)}));
+
+/* cursor */
+const cu=$('cur');let mx=-100,my=-100,cx=-100,cy=-100;
+if(!reduce&&matchMedia('(pointer:fine)').matches){
+  addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY;cu.style.opacity=1;cu.classList.toggle('big',!!e.target.closest('button,a'))});
+  (function loop(){cx+=(mx-cx)*.2;cy+=(my-cy)*.2;cu.style.transform=`translate(${cx}px,${cy}px)`;requestAnimationFrame(loop)})();
+}
+
+/* intro */
+const h=location.hash.slice(1);
+function startMain(fromIntro){
+  app.classList.add('ready');
+  if(!reduce){document.querySelectorAll('.label').forEach((el,i)=>setTimeout(()=>scramble(el,el.textContent.toUpperCase(),700),500+i*120));
+    if(!fromIntro)scramble(document.querySelector('.c-tc button'),'[ROD  LARRAIN]',900)}
+  if(['about','work','contact'].includes(h))setTimeout(()=>setOpen(h),reduce?0:900);
+  else if(CASES.some(c=>c.id===h))setTimeout(()=>setOpen('work',h),reduce?0:900);
+}
+function runIntro(){
+  try{localStorage.setItem('rl_intro','1')}catch(e){}
+  const tc=document.querySelector('.c-tc');
+  const ov=document.createElement('div');ov.className='intro';ov.setAttribute('aria-hidden','true');
+  ov.innerHTML='<div class="row mono"><span class="b">[</span><span class="nm"><span class="t">ROD  LARRAIN</span></span><span class="b">]</span></div>';
+  app.appendChild(ov);
+  const row=ov.querySelector('.row'),nm=ov.querySelector('.nm'),t=ov.querySelector('.t');
+  let finished=false;const timers=[];
+  function finish(){if(finished)return;finished=true;timers.forEach(clearTimeout);
+    tc.style.transition='none';tc.style.opacity='1';tc.style.transform='translate(-50%,0)';
+    ov.remove();startMain(true);
+    setTimeout(()=>{tc.style.transition='';tc.style.opacity='';tc.style.transform=''},60)}
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    ov.classList.add('on');
+    timers.push(setTimeout(()=>{nm.style.width=t.offsetWidth+'px';scramble(t,'ROD  LARRAIN',1150)},700));
+    timers.push(setTimeout(()=>{const r=tc.querySelector('button').getBoundingClientRect(),ar=app.getBoundingClientRect();
+      const dy=(r.top+6+r.height/2)-(ar.top+ar.height/2);row.style.transform=`translateY(${dy}px) scale(1)`},2450));
+    timers.push(setTimeout(finish,3650));
+  }));
+  ov.addEventListener('click',finish);addEventListener('keydown',finish,{once:true});
+}
+let seen=false;try{seen=localStorage.getItem('rl_intro')==='1'}catch(e){}
+if(reduce||seen||h)requestAnimationFrame(()=>requestAnimationFrame(()=>startMain(false)));
+else runIntro();
+</script>
+
+</body>
+</html>
