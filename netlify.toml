@@ -1,4 +1,4 @@
-# rlastudio.co and www.rlastudio.co permanently redirect to rodlarrain.com
+# rlastudio.co and rodrigolarrain.com (plus www) permanently redirect to rodlarrain.com
 [[redirects]]
   from = "https://rlastudio.co/*"
   to = "https://rodlarrain.com/:splat"
@@ -19,6 +19,30 @@
 
 [[redirects]]
   from = "http://www.rlastudio.co/*"
+  to = "https://rodlarrain.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://rodrigolarrain.com/*"
+  to = "https://rodlarrain.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://rodrigolarrain.com/*"
+  to = "https://rodlarrain.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.rodrigolarrain.com/*"
+  to = "https://rodlarrain.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.rodrigolarrain.com/*"
   to = "https://rodlarrain.com/:splat"
   status = 301
   force = true
