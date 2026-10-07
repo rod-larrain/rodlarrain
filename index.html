@@ -318,7 +318,7 @@ tick();setInterval(tick,10000);
 $('mode').onclick=()=>{const m=app.dataset.mode==='dark'?'light':'dark';app.dataset.mode=m;document.documentElement.style.background=m==='dark'?'#131313':'#efefef';document.documentElement.style.colorScheme=m};
 
 /* carousel */
-const stage=$('stage'),cap=$('cap');let cur=2;
+const stage=$('stage'),cap=$('cap');let cur=0;
 CASES.forEach((c,k)=>{const b=document.createElement('button');b.className='w';b.setAttribute('aria-label',c.name);
   b.innerHTML=`<img src="${c.img}" alt="" draggable="false">`;b.onclick=()=>{if(k!==cur)setCur(k)};stage.appendChild(b)});
 const X={'-2':10.6,'-1':26.1,'0':50,'1':73.6,'2':89},XM={'-1':-6,'0':50,'1':106};
@@ -364,7 +364,7 @@ function setOpen(k,caseId){
   ['about','work','contact'].forEach(n=>{const it=$('i-'+n),on=n===k;it.classList.toggle('open',on);
     if(on){setTimeout(()=>it.classList.add('shown'),reduce?0:140)}else it.classList.remove('shown')});
   document.querySelectorAll('.panel>.in').forEach(el=>el.scrollTop=0);
-  if(k==='work'){if(caseId)cur=CASES.findIndex(c=>c.id===caseId);[...stage.children].forEach(el=>el.style.transitionDelay='');layout(true)}
+  if(k==='work'){cur=caseId?Math.max(0,CASES.findIndex(c=>c.id===caseId)):0;[...stage.children].forEach(el=>el.style.transitionDelay='');layout(true)}
   try{history.replaceState(null,'',!k?location.pathname:'#'+(k==='work'?CASES[cur].id:k))}catch(e){}
 }
 document.addEventListener('click',e=>{
